@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 from gpiozero import DistanceSensor 
+from gpiozero import LED, Button, Buzzer
+import pigpio
 import RPi.GPIO as GPIO
 from time import sleep
 
@@ -18,6 +20,26 @@ GPIO.setup(SERVO_PIN, GPIO.OUT)
 pwm = GPIO.PWM(SERVO_PIN, 50)  # 50Hz PWM signal
 pwm.start(0)   
 
+#DC Motors
+M1A = 1
+M1B = 7
+M2A = 12
+M2B = 16
+
+pi.set_mode(M1A, pigpio.OUTPUT)
+pi.set_mode(M1B, pigpio.OUTPUT)
+pi.set_mode(M2A, pigpio.OUTPUT)
+pi.set_mode(M2B, pigpio.OUTPUT)
+
+def start_motors():
+    pi.write(M1A, 1)
+    pi.write(M2A, 1)
+    pi.set_PWM_dutycycle(M1B, 200)
+    pi.set_PWM_dutycycle(M2B, 200)
+
+def stop_motors():
+    pi.set_PWM_dutycycle(M1B, 0)
+    pi.set_PWM_dutycycle(M2B, 0)
 
 # Checks colour
 def check_colour(imageFrame):
@@ -83,6 +105,7 @@ webcam = cv2.VideoCapture(0)
 
 
 while True:
+    start_motors()
     if frontultrasonic.in_range:
 
         ret, imageFrame = webcam.read()
@@ -92,7 +115,7 @@ while True:
         check_colour(imageFrame)
         if check_colour(imageFrame) == '1':
             set_angle(0)
-        elif check_colour == '2':
+        elif check_colour(imageFrame) == '2':
             set_angle(180)
         else:
             set_angle(90) 
